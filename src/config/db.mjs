@@ -1,11 +1,15 @@
 // import "dotenv/config";
 import { MongoClient } from "mongodb";
 
-if (!process.env.MONGODB_URI) {
-	throw new Error("Falta la variable de entorno MONGODB_URI");
-}
-
-export const dbClient = new MongoClient(process.env.MONGODB_URI, {
-	serverSelectionTimeoutMS: 5000,
-	connectTimeoutMS: 10000,
-});
+export const dbConfig = {
+  client: new MongoClient(process.env.MONGODB_URI, {
+    serverSelectionTimeoutMS: 5000,
+    connectTimeoutMS: 10000,
+  }),
+  db() {
+    return this.client.db("iguapp");
+  },
+  collection() {
+    return this.db().collection("formulas");
+  },
+};
