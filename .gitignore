@@ -1,6 +1,9 @@
 # Dependencies
 node_modules/
 
+# mocks
+mocks/
+
 # Environment variables
 .env
 .env.*
