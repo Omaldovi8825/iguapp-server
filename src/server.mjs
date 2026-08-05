@@ -63,7 +63,7 @@ app.get("/api/formulas/:id", async (req, res) => {
 });
 
 app.post("/api/formulas", async (req, res) => {
-  const formula = req.body;
+  const { _id, ....formula } = req.body;
   try {
     const data = await dbConfig.collection().insertOne(formula);
     res.status(201).send({
