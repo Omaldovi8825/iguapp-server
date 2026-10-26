@@ -9,7 +9,7 @@ export const dbConfig = {
   db() {
     return this.client.db("iguapp");
   },
-  collection() {
-    return this.db().collection("formulas");
+  collection(collectionName) {
+    return this.db().collection(collectionName);
   },
 };

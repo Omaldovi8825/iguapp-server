@@ -4,6 +4,9 @@ node_modules/
 # mocks
 mocks/
 
+# scipts
+scripts/
+
 # Environment variables
 .env
 .env.*
