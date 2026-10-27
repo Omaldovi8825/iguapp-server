@@ -26,17 +26,44 @@ router.get("/:id", async (req, res) => {
       .collection("foldersFormulas")
       .aggregate([
         { $match: { _id: new ObjectId(id) } },
-        // {
-        //   $lookup: {
-        //     from: "cotizaciones",
-        //     localField: "_id",
-        //     foreignField: "idExpediente",
-        //     as: "cotizaciones",
-        //   },
-        // },
+        {
+          $lookup: {
+            from: "formulas",
+            let: { folderId: "$_id" },
+            pipeline: [
+              {
+                $match: {
+                  $expr: {
+                    $and: [
+                      { $eq: ["$id_folder", "$$folderId"] },
+                      { $eq: ["$b_active", true] },
+                    ],
+                  },
+                },
+              },
+              { $project: { _id: 1, nombre: 1 } },
+            ],
+            as: "formulas",
+          },
+        },
         { $project: { b_active: 0 } },
       ])
       .toArray();
+    res.status(200).send({ error: false, data });
+  } catch (error) {
+    console.error("Error en GET /api/folders-formulas/:id:", error.message);
+    res
+      .status(500)
+      .send({ error: true, mensaje: "Error al obtener el folder" });
+  }
+});
+
+router.get("/:id/basic", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const data = await dbConfig
+      .collection("foldersFormulas")
+      .findOne({ _id: new ObjectId(id) }, { projection: { b_active: 0 } });
     res.status(200).send({ error: false, data });
   } catch (error) {
     console.error("Error en GET /api/folders-formulas/:id:", error.message);
@@ -60,9 +87,7 @@ router.post("/", async (req, res) => {
     res.status(201).send({ error: false, data });
   } catch (error) {
     console.error("Error en POST /api/folders-formulas:", error.message);
-    res
-      .status(500)
-      .send({ error: true, mensaje: "Error al crear el folder" });
+    res.status(500).send({ error: true, mensaje: "Error al crear el folder" });
   }
 });
 
@@ -88,6 +113,7 @@ router.delete("/:id", async (req, res) => {
     const data = await dbConfig
       .collection("foldersFormulas")
       .updateOne({ _id: new ObjectId(id) }, { $set: { b_active: false } });
+
     res.status(200).send({ error: false, data });
   } catch (error) {
     console.error("Error en DELETE /api/folders-formulas:", error.message);

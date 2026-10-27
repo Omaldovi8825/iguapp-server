@@ -3,6 +3,17 @@ import { ObjectId } from "mongodb";
 import { dbConfig } from "../config/db.mjs";
 import { formulasMock } from "../../mocks/formulas.mjs";
 
+const formatMateriales = (materiales) => {
+  return materiales.map(({ id, cantidad, ancho, alto }) => ({
+    id: new ObjectId(id),
+    cantidad,
+    formulas: {
+      ancho,
+      alto,
+    },
+  }));
+};
+
 const router = Router();
 
 router.get("/", async (req, res) => {
@@ -10,7 +21,6 @@ router.get("/", async (req, res) => {
     const formulas = await dbConfig
       .collection("formulas")
       .find({ b_active: true }, { projection: { b_active: 0 } })
-      .maxTimeMS(5000)
       .toArray();
     // const formulas = formulasMock
     res.status(200).send({ error: false, data: formulas });
@@ -22,13 +32,31 @@ router.get("/", async (req, res) => {
   }
 });
 
+router.get("/single", async (req, res) => {
+  try {
+    const formulas = await dbConfig
+      .collection("formulas")
+      .find(
+        { b_active: true, id_folder: null },
+        { projection: { b_active: 0 } },
+      )
+      .toArray();
+
+    res.status(200).send({ error: false, data: formulas });
+  } catch (error) {
+    console.error("Error en GET /api/formulas/single:", error.message);
+    res
+      .status(500)
+      .send({ error: true, mensaje: "Error al obtener las fórmulas" });
+  }
+});
+
 router.get("/:id", async (req, res) => {
   try {
     const { id } = req.params;
     const formula = await dbConfig
       .collection("formulas")
-      .findOne({ _id: new ObjectId(id) });
-    // const formula = formulaMock;
+      .findOne({ _id: new ObjectId(id) }, { projection: { b_active: 0 } });
     res.status(200).send({ error: false, data: formula });
   } catch (error) {
     console.error("Error en GET /api/formulas/:id:", error.message);
@@ -39,9 +67,20 @@ router.get("/:id", async (req, res) => {
 });
 
 router.post("/", async (req, res) => {
-  const { _id, ...formula } = req.body;
   try {
-    const data = await dbConfig.collection("formulas").insertOne(formula);
+    const { id_folder, nombre, materiales } = req.body;
+
+    const materialesFormat = formatMateriales(materiales);
+
+    const newFormula = {
+      nombre,
+      materiales: materialesFormat,
+      id_folder: id_folder ? new ObjectId(id_folder) : null,
+      createdAt: new Date(),
+      b_active: true,
+    };
+
+    const data = await dbConfig.collection("formulas").insertOne(newFormula);
     res.status(201).send({
       error: false,
       mensaje: "Fórmula guardada correctamente",
@@ -55,10 +94,48 @@ router.post("/", async (req, res) => {
   }
 });
 
+router.post("/:id/clone", async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const { nombre, materiales, id_folder } = await dbConfig
+      .collection("formulas")
+      .findOne({ _id: new ObjectId(id) }, { projection: { b_active: 0 } });
+
+    const newFormula = {
+      nombre: `${nombre} (copia)`,
+      materiales,
+      id_folder,
+      createdAt: new Date(),
+      b_active: true,
+    };
+
+    const data = await dbConfig.collection("formulas").insertOne(newFormula);
+    res.status(201).send({
+      error: false,
+      mensaje: "Fórmula clonada correctamente",
+      data,
+    });
+  } catch (error) {
+    console.error("Error en POST /api/formulas/:id/clone", error.message);
+    res
+      .status(500)
+      .send({ error: true, mensaje: "Error al clonar la fórmula" });
+  }
+});
+
 router.put("/:id", async (req, res) => {
   try {
-    const { _id, ...formula } = req.body;
+    const { nombre, materiales } = req.body;
     const { id } = req.params;
+
+    const materialesFormat = formatMateriales(materiales);
+
+    const formula = {
+      nombre,
+      materiales: materialesFormat,
+    };
+
     const data = await dbConfig
       .collection("formulas")
       .updateOne({ _id: new ObjectId(id) }, { $set: formula });
@@ -80,7 +157,7 @@ router.delete("/:id", async (req, res) => {
   try {
     const resultado = await dbConfig
       .collection("formulas")
-      .deleteOne({ _id: new ObjectId(id) });
+      .updateOne({ _id: new ObjectId(id) }, { $set: { b_active: false } });
     res.status(200).send({
       error: false,
       mensaje: "Fórmula eliminada correctamente",
