@@ -1,7 +1,6 @@
 import { Router } from "express";
 import { ObjectId } from "mongodb";
 import { dbConfig } from "../config/db.mjs";
-// import { formulasMock } from "../../mocks/formulas.mjs";
 
 const router = Router();
 
