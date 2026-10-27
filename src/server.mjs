@@ -1,9 +1,7 @@
 import "dotenv/config";
 import express from "express";
-// import { ObjectId } from "mongodb";
 import cors from "cors";
 import { dbConfig } from "./config/db.mjs";
-// import { formulaMock, formulasMock } from "../mocks/formulas.mjs";
 import formulasRouter from "./routes/formulas.mjs";
 import expedientesRouter from "./routes/expedientes.mjs";
 import cotizacionesRouter from "./routes/cotizaciones.mjs";
