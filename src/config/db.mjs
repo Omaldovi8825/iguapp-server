@@ -10,6 +10,6 @@ export const dbConfig = {
     return this.client.db("iguapp");
   },
   collection() {
-    return this.db().collection("formulas");
+    return this.db().collection("formulasV2");
   },
 };
