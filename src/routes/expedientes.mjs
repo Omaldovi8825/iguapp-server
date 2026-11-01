@@ -8,10 +8,7 @@ router.get("/", async (req, res) => {
   try {
     const data = await dbConfig
       .collection("expedientes")
-      .find(
-        { b_active: true },
-        { projection: { b_active: 0, createdAt: 0, cotizaciones: 0 } },
-      )
+      .find({ b_active: true }, { projection: { b_active: 0 } })
       .toArray();
     res.status(200).send({ error: false, data });
   } catch (error) {
@@ -25,28 +22,36 @@ router.get("/", async (req, res) => {
 router.get("/:id", async (req, res) => {
   try {
     const { id } = req.params;
-    // const data = await dbConfig
-    //   .collection("expedientes")
-    //   .findOne(
-    //     { _id: new ObjectId(id) },
-    //     { projection: { b_active: 0, createdAt: 0 } },
-    //   );
-    // const data = expedientesMock[0];
-    const [data] = await dbConfig
+    const data = await dbConfig
       .collection("expedientes")
-      .aggregate([
-        { $match: { _id: new ObjectId(id) } },
-        {
-          $lookup: {
-            from: "cotizaciones",
-            localField: "_id",
-            foreignField: "idExpediente",
-            as: "cotizaciones",
-          },
-        },
-        { $project: { b_active: 0 } },
-      ])
-      .toArray();
+      .findOne({ _id: new ObjectId(id) }, { projection: { b_active: 0 } });
+    // const data = expedientesMock[0];
+    // const [data] = await dbConfig
+    //   .collection("expedientes")
+    //   .aggregate([
+    //     { $match: { _id: new ObjectId(id) } },
+    //     {
+    //       $lookup: {
+    //         from: "cotizaciones",
+    //         let: { expedienteId: "$_id" },
+    //         pipeline: [
+    //           {
+    //             $match: {
+    //               $expr: {
+    //                 $and: [
+    //                   { $eq: ["$idExpediente", "$$expedienteId"] },
+    //                   { $eq: ["$b_active", true] },
+    //                 ],
+    //               },
+    //             },
+    //           },
+    //         ],
+    //         as: "cotizaciones",
+    //       },
+    //     },
+    //     { $project: { b_active: 0 } },
+    //   ])
+    //   .toArray();
     res.status(200).send({ error: false, data });
   } catch (error) {
     console.error("Error en GET /api/expedientes/:id:", error.message);
@@ -101,10 +106,10 @@ router.delete("/:id", async (req, res) => {
     res.status(200).send({ error: false, data });
   } catch (error) {
     console.error("Error en DELETE /api/expedientes:", error.message);
+    res
+      .status(500)
+      .send({ error: true, mensaje: "Error al eliminar el expediente" });
   }
-  res
-    .status(500)
-    .send({ error: true, mensaje: "Error al eliminar el expediente" });
 });
 
 export default router;

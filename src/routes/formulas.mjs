@@ -17,11 +17,62 @@ const router = Router();
 
 router.get("/", async (req, res) => {
   try {
+    const { id_folder } = req.query;
     const formulas = await dbConfig
       .collection("formulas")
-      .find({ b_active: true }, { projection: { b_active: 0 } })
+      .find(
+        { b_active: true, id_folder: new ObjectId(id_folder) },
+        { projection: { b_active: 0 } },
+      )
       .toArray();
-    // const formulas = formulasMock
+    // const formulas = await dbConfig
+    //   .collection("formulas")
+    //   .aggregate([
+    //     {
+    //       $match: {
+    //         b_active: true,
+    //         id_folder: new ObjectId(id_folder),
+    //       },
+    //     },
+    //     {
+    //       $lookup: {
+    //         from: "materiales",
+    //         localField: "materiales.id",
+    //         foreignField: "_id",
+    //         pipeline: [{ $project: { b_active: 0 } }],
+    //         as: "_mats",
+    //       },
+    //     },
+    //     {
+    //       $addFields: {
+    //         materiales: {
+    //           $map: {
+    //             input: "$materiales",
+    //             as: "m",
+    //             in: {
+    //               id: "$$m.id",
+    //               cantidad: "$$m.cantidad",
+    //               formulas: "$$m.formulas",
+    //               info: {
+    //                 $arrayElemAt: [
+    //                   {
+    //                     $filter: {
+    //                       input: "$_mats",
+    //                       as: "cat",
+    //                       cond: { $eq: ["$$cat._id", "$$m.id"] },
+    //                     },
+    //                   },
+    //                   0,
+    //                 ],
+    //               },
+    //             },
+    //           },
+    //         },
+    //       },
+    //     },
+    //     { $project: { b_active: 0, _mats: 0 } },
+    //   ])
+    //   .toArray();
     res.status(200).send({ error: false, data: formulas });
   } catch (error) {
     console.error("Error en GET /api/formulas:", error.message);

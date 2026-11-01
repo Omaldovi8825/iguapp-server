@@ -4,49 +4,64 @@ import { dbConfig } from "../config/db.mjs";
 
 const router = Router();
 
+const formatMateriales = (materiales) => {
+  return materiales.map((material) => {
+    return {
+      ...material,
+      id: new ObjectId(material.id),
+    };
+  });
+};
+
 router.get("/", async (req, res) => {
   try {
+    const { id_expediente } = req.query;
     const data = await dbConfig
-      .collection("expedientes")
+      .collection("cotizaciones")
       .find(
-        { b_active: true },
-        { projection: { b_active: 0, createdAt: 0, cotizaciones: 0 } },
+        {
+          b_active: true,
+          id_expediente: new ObjectId(id_expediente),
+        },
+        { projection: { b_active: 0 } },
       )
       .toArray();
     res.status(200).send({ error: false, data });
   } catch (error) {
-    console.error("Error en GET /api/expedientes:", error.message);
+    console.error("Error en GET /api/cotizaciones:", error.message);
     res
       .status(500)
-      .send({ error: true, mensaje: "Error al obtener los expedientes" });
+      .send({ error: true, mensaje: "Error al obtener las cotizaciones" });
   }
 });
 
 router.get("/:id", async (req, res) => {
   try {
     const { id } = req.params;
-    // const data = await dbConfig
-    //   .collection("expedientes")
-    //   .findOne(
-    //     { _id: new ObjectId(id) },
-    //     { projection: { b_active: 0, createdAt: 0 } },
-    //   );
-    const data = expedientesMock[0];
+    const data = await dbConfig
+      .collection("cotizaciones")
+      .findOne({ _id: new ObjectId(id) }, { projection: { b_active: 0 } });
     res.status(200).send({ error: false, data });
   } catch (error) {
-    console.error("Error en GET /api/expedientes/:id:", error.message);
+    console.error("Error en GET /api/cotizaciones/:id:", error.message);
     res
       .status(500)
-      .send({ error: true, mensaje: "Error al obtener el expediente" });
+      .send({ error: true, mensaje: "Error al obtener la cotización" });
   }
 });
 
 router.post("/", async (req, res) => {
   try {
-    const { formula, idExpediente, ...rest } = req.body;
+    const { id_expediente, formula, materiales, ...rest } = req.body;
     const newCotizacion = {
       ...rest,
-      idExpediente: new ObjectId(idExpediente),
+      id_expediente: new ObjectId(id_expediente),
+      materiales: formatMateriales(materiales),
+      formula: {
+        id: new ObjectId(formula.id),
+        id_folder:
+          formula.id_folder !== "0" ? new ObjectId(formula.id_folder) : null,
+      },
       createdAt: new Date(),
       b_active: true,
     };
@@ -55,26 +70,38 @@ router.post("/", async (req, res) => {
       .insertOne(newCotizacion);
     res.status(201).send({ error: false, data });
   } catch (error) {
-    console.error("Error en POST /api/expedientes:", error.message);
+    console.error("Error en POST /api/cotizaciones:", error.message);
     res
       .status(500)
-      .send({ error: true, mensaje: "Error al crear el expediente" });
+      .send({ error: true, mensaje: "Error al crear la cotización" });
   }
 });
 
 router.put("/:id", async (req, res) => {
   try {
     const { id } = req.params;
-    const { nombre } = req.body;
+
+    const { _id, id_expediente, formula, materiales, ...rest } = req.body;
+    const dataCotizacion = {
+      ...rest,
+      materiales: formatMateriales(materiales),
+      id_expediente: new ObjectId(id_expediente),
+      formula: {
+        id: new ObjectId(formula.id),
+        id_folder:
+          formula.id_folder !== "0" ? new ObjectId(formula.id_folder) : null,
+      },
+    };
+
     const data = await dbConfig
-      .collection("expedientes")
-      .updateOne({ _id: new ObjectId(id) }, { $set: { nombre } });
+      .collection("cotizaciones")
+      .updateOne({ _id: new ObjectId(id) }, { $set: dataCotizacion });
     res.status(200).send({ error: false, data });
   } catch (error) {
-    console.error("Error en PUT /api/expedientes:", error.message);
+    console.error("Error en PUT /api/cotizaciones:", error.message);
     res
       .status(500)
-      .send({ error: true, mensaje: "Error al actualizar el expediente" });
+      .send({ error: true, mensaje: "Error al actualizar la cotización" });
   }
 });
 
@@ -82,15 +109,15 @@ router.delete("/:id", async (req, res) => {
   try {
     const { id } = req.params;
     const data = await dbConfig
-      .collection("expedientes")
+      .collection("cotizaciones")
       .updateOne({ _id: new ObjectId(id) }, { $set: { b_active: false } });
     res.status(200).send({ error: false, data });
   } catch (error) {
-    console.error("Error en DELETE /api/expedientes:", error.message);
+    console.error("Error en DELETE /api/cotizaciones:", error.message);
+    res
+      .status(500)
+      .send({ error: true, mensaje: "Error al eliminar la cotización" });
   }
-  res
-    .status(500)
-    .send({ error: true, mensaje: "Error al eliminar el expediente" });
 });
 
 export default router;

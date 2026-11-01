@@ -22,33 +22,9 @@ router.get("/", async (req, res) => {
 router.get("/:id", async (req, res) => {
   try {
     const { id } = req.params;
-    const [data] = await dbConfig
+    const data = await dbConfig
       .collection("foldersFormulas")
-      .aggregate([
-        { $match: { _id: new ObjectId(id) } },
-        {
-          $lookup: {
-            from: "formulas",
-            let: { folderId: "$_id" },
-            pipeline: [
-              {
-                $match: {
-                  $expr: {
-                    $and: [
-                      { $eq: ["$id_folder", "$$folderId"] },
-                      { $eq: ["$b_active", true] },
-                    ],
-                  },
-                },
-              },
-              { $project: { _id: 1, nombre: 1 } },
-            ],
-            as: "formulas",
-          },
-        },
-        { $project: { b_active: 0 } },
-      ])
-      .toArray();
+      .findOne({ _id: new ObjectId(id) }, { projection: { b_active: 0 } });
     res.status(200).send({ error: false, data });
   } catch (error) {
     console.error("Error en GET /api/folders-formulas/:id:", error.message);
