@@ -57,11 +57,6 @@ router.post("/", async (req, res) => {
       ...rest,
       id_expediente: new ObjectId(id_expediente),
       materiales: formatMateriales(materiales),
-      formula: {
-        id: new ObjectId(formula.id),
-        id_folder:
-          formula.id_folder !== "0" ? new ObjectId(formula.id_folder) : null,
-      },
       createdAt: new Date(),
       b_active: true,
     };
@@ -85,12 +80,6 @@ router.put("/:id", async (req, res) => {
     const dataCotizacion = {
       ...rest,
       materiales: formatMateriales(materiales),
-      id_expediente: new ObjectId(id_expediente),
-      formula: {
-        id: new ObjectId(formula.id),
-        id_folder:
-          formula.id_folder !== "0" ? new ObjectId(formula.id_folder) : null,
-      },
     };
 
     const data = await dbConfig
