@@ -13,7 +13,9 @@ router.post("/login", async (req, res) => {
       .status(401)
       .send({ error: true, mensaje: "Password incorrecto" });
   }
-  const token = jwt.sign({}, process.env.JWT_SECRET, { expiresIn: "7d" });
+  const token = jwt.sign({}, process.env.JWT_SECRET, {
+    expiresIn: process.env.JWT_EXPIRES_IN || "7d",
+  });
   res
     .status(200)
     .send({ error: false, mensaje: "Usuario logueado", data: { token } });
