@@ -7,6 +7,8 @@ import expedientesRouter from "./routes/expedientes.mjs";
 import cotizacionesRouter from "./routes/cotizaciones.mjs";
 import foldersFormulasRouter from "./routes/foldersFormulas.mjs";
 import materialesRouter from "./routes/materiales.mjs";
+import authRouter from "./routes/auth.mjs";
+import { authMiddleware } from "./middlewares/auth.mjs";
 
 const PORT = process.env.PORT || 3000;
 const dt = new Date();
@@ -33,11 +35,12 @@ app.get("/version", (req, res) => {
   res.send({ version: dt.toString() });
 });
 
-app.use("/api/materiales", materialesRouter);
-app.use("/api/formulas", formulasRouter);
-app.use("/api/expedientes", expedientesRouter);
-app.use("/api/cotizaciones", cotizacionesRouter);
-app.use("/api/folders-formulas", foldersFormulasRouter);
+app.use("/api/auth", authRouter);
+app.use("/api/materiales", authMiddleware, materialesRouter);
+app.use("/api/formulas", authMiddleware, formulasRouter);
+app.use("/api/expedientes", authMiddleware, expedientesRouter);
+app.use("/api/cotizaciones", authMiddleware, cotizacionesRouter);
+app.use("/api/folders-formulas", authMiddleware, foldersFormulasRouter);
 
 app.listen(PORT, () => {
   console.log(`Server corriendo en puerto ${PORT}`);
