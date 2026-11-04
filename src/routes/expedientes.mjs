@@ -25,33 +25,6 @@ router.get("/:id", async (req, res) => {
     const data = await dbConfig
       .collection("expedientes")
       .findOne({ _id: new ObjectId(id) }, { projection: { b_active: 0 } });
-    // const data = expedientesMock[0];
-    // const [data] = await dbConfig
-    //   .collection("expedientes")
-    //   .aggregate([
-    //     { $match: { _id: new ObjectId(id) } },
-    //     {
-    //       $lookup: {
-    //         from: "cotizaciones",
-    //         let: { expedienteId: "$_id" },
-    //         pipeline: [
-    //           {
-    //             $match: {
-    //               $expr: {
-    //                 $and: [
-    //                   { $eq: ["$idExpediente", "$$expedienteId"] },
-    //                   { $eq: ["$b_active", true] },
-    //                 ],
-    //               },
-    //             },
-    //           },
-    //         ],
-    //         as: "cotizaciones",
-    //       },
-    //     },
-    //     { $project: { b_active: 0 } },
-    //   ])
-    //   .toArray();
     res.status(200).send({ error: false, data });
   } catch (error) {
     console.error("Error en GET /api/expedientes/:id:", error.message);
