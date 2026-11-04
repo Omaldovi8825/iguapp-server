@@ -22,7 +22,7 @@ router.post("/login", async (req, res) => {
 });
 
 router.get("/check-token", authMiddleware, (req, res) => {
-  res.status(200).send({ error: false, mensaje: "Token valido" });
+  res.status(200).send({ error: false, mensaje: "Token válido" });
 });
 
 export default router;

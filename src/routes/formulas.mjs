@@ -91,9 +91,7 @@ router.post("/", async (req, res) => {
     });
   } catch (error) {
     console.error("Error en POST /api/formulas:", error.message);
-    res
-      .status(500)
-      .send({ error: true, mensaje: "Error al guardar la fórmula" });
+    res.status(500).send({ error: true, mensaje: "Error al crear la fórmula" });
   }
 });
 

@@ -52,7 +52,7 @@ router.post("/", async (req, res) => {
     console.error("Error en POST /api/materiales:", error.message);
     res
       .status(500)
-      .send({ error: true, mensaje: "Error al guardar el material" });
+      .send({ error: true, mensaje: "Error al crear el material" });
   }
 });
 

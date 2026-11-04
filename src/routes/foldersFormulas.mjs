@@ -15,7 +15,10 @@ router.get("/", async (req, res) => {
     console.error("Error en GET /api/folders-formulas:", error.message);
     res
       .status(500)
-      .send({ error: true, mensaje: "Error al obtener los folders" });
+      .send({
+        error: true,
+        mensaje: "Error al obtener los folders de fórmulas",
+      });
   }
 });
 
@@ -30,22 +33,7 @@ router.get("/:id", async (req, res) => {
     console.error("Error en GET /api/folders-formulas/:id:", error.message);
     res
       .status(500)
-      .send({ error: true, mensaje: "Error al obtener el folder" });
-  }
-});
-
-router.get("/:id/basic", async (req, res) => {
-  try {
-    const { id } = req.params;
-    const data = await dbConfig
-      .collection("foldersFormulas")
-      .findOne({ _id: new ObjectId(id) }, { projection: { b_active: 0 } });
-    res.status(200).send({ error: false, data });
-  } catch (error) {
-    console.error("Error en GET /api/folders-formulas/:id:", error.message);
-    res
-      .status(500)
-      .send({ error: true, mensaje: "Error al obtener el folder" });
+      .send({ error: true, mensaje: "Error al obtener el folder de fórmulas" });
   }
 });
 
@@ -63,7 +51,9 @@ router.post("/", async (req, res) => {
     res.status(201).send({ error: false, data });
   } catch (error) {
     console.error("Error en POST /api/folders-formulas:", error.message);
-    res.status(500).send({ error: true, mensaje: "Error al crear el folder" });
+    res
+      .status(500)
+      .send({ error: true, mensaje: "Error al crear el folder de fórmulas" });
   }
 });
 
@@ -79,7 +69,10 @@ router.put("/:id", async (req, res) => {
     console.error("Error en PUT /api/folders-formulas:", error.message);
     res
       .status(500)
-      .send({ error: true, mensaje: "Error al actualizar el folder" });
+      .send({
+        error: true,
+        mensaje: "Error al actualizar el folder de fórmulas",
+      });
   }
 });
 
@@ -94,7 +87,9 @@ router.delete("/:id", async (req, res) => {
   } catch (error) {
     console.error("Error en DELETE /api/folders-formulas:", error.message);
   }
-  res.status(500).send({ error: true, mensaje: "Error al eliminar el folder" });
+  res
+    .status(500)
+    .send({ error: true, mensaje: "Error al eliminar el folder de fórmulas" });
 });
 
 export default router;

@@ -1,12 +1,11 @@
 import jwt from "jsonwebtoken";
 
 export const authMiddleware = (req, res, next) => {
-  const header = req.headers.authorization;
-  if (!header?.startsWith("Bearer ")) {
+  const token = req.headers.authorization;
+  if (!token) {
     return res.status(401).send({ error: true, mensaje: "Sin token" });
   }
   try {
-    const token = header.slice(7); // quita "Bearer "
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
     if (!decoded) {
       return res.status(401).send({ error: true, mensaje: "Token inválido" });
